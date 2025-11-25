@@ -266,10 +266,20 @@ function App() {
   };
 
   const fetchChats = () => {
-    if (!user) return;
+    if (!user || !user.id) return;
     fetch(`http://localhost:8000/chats?user_id=${user.id}`)
-      .then(res => res.json())
-      .then(data => setChats(data))
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch chats");
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) {
+          setChats(data);
+        } else {
+          console.error("Chats data is not an array:", data);
+          setChats([]);
+        }
+      })
       .catch(err => console.error("Error fetching chats:", err));
   };
 
@@ -305,10 +315,19 @@ function App() {
   }, [user]);
 
   useEffect(() => {
-      if (user) {
+      if (user && user.id) {
           fetch(`http://localhost:8000/contacts/?user_id=${user.id}`)
-            .then(res => res.json())
-            .then(data => setContacts(data))
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to fetch contacts");
+                return res.json();
+            })
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setContacts(data);
+                } else {
+                    setContacts([]);
+                }
+            })
             .catch(err => console.error("Error fetching contacts:", err));
       }
   }, [user]);

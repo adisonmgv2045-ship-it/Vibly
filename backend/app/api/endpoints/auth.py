@@ -90,5 +90,3 @@ def verify_code(verify_in: schemas.UserVerify, db: Session = Depends(get_db)):
         db.commit()
     
     return {"user": user}
-    
-    return {"user": user}
