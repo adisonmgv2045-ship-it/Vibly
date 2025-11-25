@@ -5,6 +5,7 @@ import './index.css';
 const LoginScreen = ({ onLogin }) => {
   const [step, setStep] = useState(1); // 1: Phone, 2: Code
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [countryCode, setCountryCode] = useState("+53");
   const [code, setCode] = useState("");
 
@@ -21,11 +22,15 @@ const LoginScreen = ({ onLogin }) => {
   };
 
   const handleSendCode = () => {
+    if (!phone || !email) {
+        alert("Por favor ingresa teléfono y correo");
+        return;
+    }
     const fullPhone = `${countryCode}${phone}`;
     fetch('http://localhost:8000/auth/send-code', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone_number: fullPhone })
+      body: JSON.stringify({ phone_number: fullPhone, email: email })
     })
     .then(res => {
         if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
@@ -43,11 +48,11 @@ const LoginScreen = ({ onLogin }) => {
     fetch('http://localhost:8000/auth/verify-code', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone_number: fullPhone, code: code })
+      body: JSON.stringify({ phone_number: fullPhone, email: email, code: code })
     })
     .then(res => {
-      if (!res.ok) throw new Error("Código inválido");
-      return res.json();
+        if (!res.ok) throw new Error("Código inválido");
+        return res.json();
     })
     .then(data => {
       onLogin(data.user);
@@ -65,8 +70,8 @@ const LoginScreen = ({ onLogin }) => {
       <div style={{background: 'white', padding: '30px', borderRadius: '20px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', width: '100%', maxWidth: '400px'}}>
         {step === 1 ? (
           <>
-            <h2 style={{marginBottom: '20px'}}>Ingresa tu número</h2>
-            <div style={{display: 'flex', gap: '10px', marginBottom: '20px'}}>
+            <h2 style={{marginBottom: '20px'}}>Ingresa tus datos</h2>
+            <div style={{display: 'flex', gap: '10px', marginBottom: '15px'}}>
               <div style={{display: 'flex', alignItems: 'center', background: 'white', border: '1px solid #ddd', borderRadius: '10px', padding: '0 10px', width: '110px'}}>
                 <span style={{fontSize: '1.5rem', marginRight: '5px'}}>{getFlag(countryCode)}</span>
                 <input 
@@ -84,20 +89,30 @@ const LoginScreen = ({ onLogin }) => {
                 style={{flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #ddd'}}
               />
             </div>
+            <div style={{marginBottom: '20px'}}>
+                <input 
+                    type="email" 
+                    placeholder="Correo electrónico (Gmail)" 
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    style={{width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #ddd'}}
+                />
+            </div>
             <button onClick={handleSendCode} style={{width: '100%', padding: '12px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold'}}>
-              Enviar Código SMS
+              Enviar Código por Correo
             </button>
           </>
         ) : (
           <>
             <h2 style={{marginBottom: '20px'}}>Verificar Código</h2>
-            <p style={{marginBottom: '20px', color: '#666'}}>Enviado a {countryCode} {phone}</p>
+            <p style={{marginBottom: '20px', color: '#666'}}>Enviado a {email}</p>
             <input 
               type="text" 
               placeholder="Código de 6 dígitos" 
               value={code}
               onChange={e => setCode(e.target.value)}
               style={{width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #ddd', marginBottom: '20px', textAlign: 'center', letterSpacing: '5px', fontSize: '1.2rem'}}
+
             />
             <button onClick={handleVerify} style={{width: '100%', padding: '12px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold'}}>
               Verificar y Entrar
