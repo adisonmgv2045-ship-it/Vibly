@@ -70,6 +70,7 @@ def create_message(db: Session, message: schemas.MessageCreate):
 def create_user(db: Session, user: schemas.UserCreate):
     db_user = models.User(
         phone_number=user.phone_number,
+        email=user.email,
         username=user.username,
         full_name=user.full_name,
         avatar_url=user.avatar_url

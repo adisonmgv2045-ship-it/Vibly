@@ -42,6 +42,7 @@ class Chat(ChatBase):
 
 class UserBase(BaseModel):
     phone_number: str
+    email: Optional[str] = None
     username: Optional[str] = None
     full_name: Optional[str] = None
     bio: Optional[str] = None
@@ -52,9 +53,11 @@ class UserCreate(UserBase):
 
 class UserLogin(BaseModel):
     phone_number: str
+    email: str
 
 class UserVerify(BaseModel):
     phone_number: str
+    email: str
     code: str
 
 class User(UserBase):
