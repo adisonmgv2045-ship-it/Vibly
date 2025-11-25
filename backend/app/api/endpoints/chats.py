@@ -44,26 +44,7 @@ def read_settings(user_id: int, db: Session = Depends(get_db)):
 def update_settings(user_id: int, settings: schemas.SettingsUpdate, db: Session = Depends(get_db)):
     return crud.update_user_settings(db, user_id=user_id, settings=settings)
 
-@router.post("/auth/send-code")
-def send_auth_code(login: schemas.UserLogin, db: Session = Depends(get_db)):
-    import random
-    code = str(random.randint(100000, 999999))
-    crud.create_auth_code(db, login.phone_number, code)
-    print(f"--- SMS SIMULADO PARA {login.phone_number}: {code} ---")
-    return {"message": "Código enviado (revisa la consola del backend)"}
 
-@router.post("/auth/verify-code")
-def verify_auth_code(verify: schemas.UserVerify, db: Session = Depends(get_db)):
-    code_record = crud.verify_auth_code(db, verify.phone_number, verify.code)
-    if not code_record:
-        raise HTTPException(status_code=400, detail="Código inválido o expirado")
-    
-    user = crud.get_user_by_phone(db, verify.phone_number)
-    if not user:
-        # Crear usuario nuevo si no existe
-        user = crud.create_user(db, schemas.UserCreate(phone_number=verify.phone_number))
-    
-    return {"message": "Login exitoso", "user_id": user.id, "user": user}
 
 @router.post("/chats/private", response_model=schemas.Chat)
 def create_private_chat(chat_in: schemas.ChatCreatePrivate, db: Session = Depends(get_db)):
